@@ -169,7 +169,7 @@ function installer.getPackedProject(branch, ignoreList)
             projectContent = projectContent .. "\n" .. newFile
         end
     end
-    projectContent = projectContent .. projectContentEnd
+    projectContent = projectContent
 
     return projectContent
 end
