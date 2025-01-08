@@ -236,16 +236,38 @@ commands.decr = {
     "decr <key|path> <val>  --  decrement the value at the path by decr if the value is a number, val must be positive"
 }
 
+local _split_on_space_with_quotes = function(str)
+    local quoted_values = {}
+    local i = 1
+    for substr in string.gmatch(str, "%b''") do
+        quoted_values["@" .. tostring(i)] = substr
+        str = string.gsub(str, substr, "@" .. tostring(i))
+        i = i + 1
+    end
+    local substrs = {}
+    i = 1
+    for substr in string.gmatch(str, "%S+") do
+        substrs[i] = substr
+        i = i + 1
+    end
+    for j, v in ipairs(substrs) do
+        local tag = string.gmatch(v, "(@[0-9]+)")()
+        if tag then
+            if quoted_values[tag] then
+                substrs[j] = quoted_values[tag]
+            else
+                substrs[j] = ""
+            end
+        end
+    end
+    return substrs
+end
+
 local try_do_command = function(state, str, lifetimes)
     if type(str) ~= "string" then
         return make_error("pass commands as a string, do list_cmd to see available commands")
     end
-    local cmd = {}
-    local i = 1
-    for w in string.gmatch(str, "%S+") do
-        cmd[i] = w
-        i = i + 1
-    end
+    local cmd = _split_on_space_with_quotes(str)
     if not cmd[1] then
         return make_error("do list_cmd to see available commands")
     end
