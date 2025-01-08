@@ -13,3 +13,4 @@ run the server first to get the server address then create a file in the client 
   client_id = "mysupersecretclientid"
 }
 ```
+clients that share a `client_id` will be able to share state
