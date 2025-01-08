@@ -15,9 +15,9 @@ local memdb = id:Protocol {
     deserialize = textutils.unserialize,
 }
 
-local p = shell.resolve("./.memdb.config")
+local p = shell.resolve("./.memdb.client.config")
 if not fs.exists(p) then
-    error("Cant find config file. Create ./.memdb.config with server and client_id fields")
+    error("Cant find config file. Create ./.memdb.client.config with server and client_id fields")
 end
 local f = fs.open(p, "r")
 local config = textutils.unserialize(f.readAll())

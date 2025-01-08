@@ -39,21 +39,48 @@ local main = function()
                 connections[id].conn:send("ok")
                 if not state[parsed_for_id] then
                     state[parsed_for_id] = {
-                        data = {}
+                        data = {},
+                        lifetimes = {}
                     }
-                    state[parsed_for_id].runner = c.new_command_runner(state[parsed_for_id].data)
+                    state[parsed_for_id].runner = c.new_command_runner(state[parsed_for_id].data,
+                        state[parsed_for_id].lifetimes)
                 end
             else
                 print("got", "'" .. p3 .. "'", "on channel", ch, "from", dist, "blocks away")
+                connections[id].last_msg_time = os.epoch("utc")
                 local res = state[connections[id].client_id].runner(p3)
                 connections[id].conn:send(textutils.serialize(res))
-                connections[id].last_msg_time = os.epoch("utc")
             end
         end
     end
 end
 
-local handle_timeout = function()
+local handle_cache_invalidation = function()
+    while true do
+        for _, client_state in pairs(state) do
+            for path, lifetime in pairs(client_state.lifetimes) do
+                -- never expire for 0 duration
+                if lifetime.duration == 0 or not lifetime.duration then
+                    goto continue
+                end
+                -- duration greater than a month is considered an epoch timestamp in seconds
+                if lifetime.duration > 60 * 60 * 24 * 30 then
+                    if os.epoch("utc") / 1000 >= lifetime.duration then
+                        client_state.runner("del " .. path)
+                        client_state.lifetimes[path] = nil
+                    end
+                elseif (os.epoch("utc") - lifetime.set_at) / 1000 >= lifetime.duration then
+                    client_state.runner("del " .. path)
+                    client_state.lifetimes[path] = nil
+                end
+                ::continue::
+            end
+        end
+        os.sleep(1)
+    end
+end
+
+local handle_connection_timeout = function()
     while true do
         for k, v in pairs(connections) do
             if (os.epoch("utc") - v.last_msg_time) / 1000 > connection_timeout then
@@ -65,4 +92,4 @@ local handle_timeout = function()
     end
 end
 
-parallel.waitForAny(main, ecnet2.daemon, handle_timeout)
+parallel.waitForAny(main, ecnet2.daemon, handle_connection_timeout, handle_cache_invalidation)

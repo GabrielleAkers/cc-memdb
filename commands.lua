@@ -77,7 +77,9 @@ commands.get_id = {
 local _set_by_path = function(t, path, val)
     local p, k
     for s in string.gmatch(path, "[^%.]+") do
-        t[s] = {}
+        if not t[s] then
+            t[s] = {}
+        end
         k, p, t = s, t, t[s]
     end
     if type(val) == "string" then
@@ -98,7 +100,8 @@ commands.set = {
         _set_by_path(cmd.state, cmd.path, cmd.data)
         return make_response(true)
     end,
-    help = "set <key|path> <data>  --  stores data overwriting existing, pass tables with no spaces"
+    help =
+    "set <key|path> <data> [lifetime]  --  stores data overwriting existing, pass tables with no spaces and strings wrapped in single quotes"
 }
 
 commands.safe_set = {
@@ -124,7 +127,7 @@ commands.safe_set = {
         end
     end,
     help =
-    "safe_set <key|path> <data> <id>  --  stores data only if the existing data's id matches the id passed, pass tables with no spaces"
+    "safe_set <key|path> <data> <id> [lifetime]  --  stores data only if the existing data's id matches the id passed, pass tables with no spaces and strings wrapped in single quotes"
 }
 
 commands.del = {
@@ -233,7 +236,7 @@ commands.decr = {
     "decr <key|path> <val>  --  decrement the value at the path by decr if the value is a number, val must be positive"
 }
 
-local try_do_command = function(state, str)
+local try_do_command = function(state, str, lifetimes)
     if type(str) ~= "string" then
         return make_error("pass commands as a string, do list_cmd to see available commands")
     end
@@ -249,14 +252,28 @@ local try_do_command = function(state, str)
     if not commands[cmd[1]] then
         return make_error("command not recognized. Do list_cmd to see available commands")
     end
-    return commands[cmd[1]].cmd({ state = state, path = cmd[2], data = cmd[3], id = cmd[4] })
+    local cmd_res = commands[cmd[1]].cmd({ state = state, path = cmd[2], data = cmd[3], id = cmd[4] })
+    if (cmd[1] == "set" or cmd[1] == "safe_set") and cmd[2] then
+        local duration
+        if cmd[1] == "set" then
+            duration = tonumber(cmd[4])
+        else
+            duration = tonumber(cmd[5])
+        end
+        if not lifetimes[cmd[2]] then
+            lifetimes[cmd[2]] = {}
+        end
+        lifetimes[cmd[2]].set_at = os.epoch("utc")
+        lifetimes[cmd[2]].duration = (type(duration) == "number" and duration >= 0) and duration or 0
+    end
+    return cmd_res
 end
 
 return {
     commands = commands.list_cmd.cmd().data,
-    new_command_runner = function(state)
+    new_command_runner = function(state, lifetimes)
         return function(str)
-            return try_do_command(state, str)
+            return try_do_command(state, str, lifetimes)
         end
     end
 }

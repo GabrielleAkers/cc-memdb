@@ -1,6 +1,9 @@
-local state = {}
+local state = {
+    data = {},
+    lifetimes = {}
+}
 
-local try_do = require("commands").new_command_runner(state)
+local try_do = require("commands").new_command_runner(state.data, state.lifetimes)
 
 local tests = {
     unrecognized_cmd = try_do("fakecmd").error ~= nil,
@@ -22,6 +25,15 @@ local tests = {
     del_path = try_do("del b.c.d").data == true,
     get_deleted_path_false = not try_do("get b.c.d").data ~= nil,
     del_path_not_exists = not try_do("del b.c.d").data ~= nil,
+    set_then_delete_then_get_then_set_then_get = (function()
+        try_do("set a 1")
+        local r1 = try_do("get a").data == 1
+        try_do("del a")
+        local r2 = try_do("get a").error ~= nil
+        try_do("set a 1")
+        local r3 = try_do("get a").data == 1
+        return r1 and r2 and r3
+    end)(),
     append_no_key = try_do("append").error ~= nil,
     append_nil = try_do("append a").error ~= nil,
     append_not_table = (function()
@@ -32,13 +44,13 @@ local tests = {
         try_do("set a {}")
         local r1 = try_do("append a 1").data
         local r2 = try_do("append a 2").data
-        return r1 and r2 and state.a[1] == 1 and state.a[2] == 2
+        return r1 and r2 and state.data.a[1] == 1 and state.data.a[2] == 2
     end)(),
     append_path_val = (function()
         try_do("set a.b {}")
         local r1 = try_do("append a.b 1")
         local r2 = try_do("append a.b 2")
-        return r1.data and r2.data and state.a.b[1] == 1 and state.a.b[2] == 2
+        return r1.data and r2.data and state.data.a.b[1] == 1 and state.data.a.b[2] == 2
     end)(),
     prepend_no_key = try_do("prepend").error ~= nil,
     prepend_nil = try_do("prepend a").error ~= nil,
@@ -50,13 +62,13 @@ local tests = {
         try_do("set a {}")
         local r1 = try_do("prepend a 1").data ~= nil
         local r2 = try_do("prepend a 2").data ~= nil
-        return r1 and r2 and state.a[1] == 2 and state.a[2] == 1
+        return r1 and r2 and state.data.a[1] == 2 and state.data.a[2] == 1
     end)(),
     prepend_path_val = (function()
         try_do("set a.b {}")
         local r1 = try_do("prepend a.b 1")
         local r2 = try_do("prepend a.b 2")
-        return r1.data ~= nil and r2.data ~= nil and state.a.b[1] == 2 and state.a.b[2] == 1
+        return r1.data ~= nil and r2.data ~= nil and state.data.a.b[1] == 2 and state.data.a.b[2] == 1
     end)(),
     incr_nil = try_do("incr").error ~= nil,
     incr_nonnumber = (function()
@@ -70,7 +82,7 @@ local tests = {
     incr_val = (function()
         try_do("set a 1")
         try_do("incr a 1")
-        return state.a == 2
+        return state.data.a == 2
     end)(),
     decr_nil = try_do("decr").error ~= nil,
     decr_nonnumber = (function()
@@ -84,7 +96,7 @@ local tests = {
     decr_val = (function()
         try_do("set a 1")
         try_do("decr a 1")
-        return state.a == 0
+        return state.data.a == 0
     end)()
 }
 
