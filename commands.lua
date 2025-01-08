@@ -49,7 +49,7 @@ end
 commands.get = {
     cmd = function(cmd)
         if not cmd.path then
-            return make_error("set requires a path")
+            return make_error("get requires a path")
         end
         local res = _get_by_path(cmd.state, cmd.path)
         if res == nil then
@@ -106,10 +106,10 @@ commands.set = {
 commands.safe_set = {
     cmd = function(cmd)
         if not cmd.path then
-            return make_error("set requires a path")
+            return make_error("safe_set requires a path")
         end
         if cmd.data == nil then
-            return make_error("cant set nil value")
+            return make_error("cant safe_set nil value")
         end
         if not cmd.id then
             return make_error("safe_set requires and id")
@@ -181,6 +181,60 @@ commands.prepend = {
     help = "prepend <key|path> <data>  --  prepend to given path if the data at that path is a table"
 }
 
+commands.incr = {
+    cmd = function(cmd)
+        if not cmd.path then
+            return make_error("prepend requires a path")
+        end
+        if cmd.data == nil then
+            return make_error("cannot incr nil")
+        end
+        local d = textutils.unserialise(cmd.data)
+        if type(d) ~= "number" then
+            return make_error("value must be a number")
+        end
+        if d < 0 then
+            return make_error("cant incr by negative number, use decr instead")
+        end
+        local existing_d = _get_by_path(cmd.state, cmd.path)
+        if type(existing_d) ~= "number" then
+            return make_error("value at path " .. cmd.path .. " is not a number")
+        end
+        existing_d = existing_d + d
+        _set_by_path(cmd.state, cmd.path, existing_d)
+        return make_response(true)
+    end,
+    help =
+    "incr <key|path> <val>  --  increment the value at the path by incr if the value is a number, val must be positive"
+}
+
+commands.decr = {
+    cmd = function(cmd)
+        if not cmd.path then
+            return make_error("prepend requires a path")
+        end
+        if cmd.data == nil then
+            return make_error("cannot decr nil")
+        end
+        local d = textutils.unserialise(cmd.data)
+        if type(d) ~= "number" then
+            return make_error("value must be a number")
+        end
+        if d < 0 then
+            return make_error("cant decr by negative number, use incr instead")
+        end
+        local existing_d = _get_by_path(cmd.state, cmd.path)
+        if type(existing_d) ~= "number" then
+            return make_error("value at path " .. cmd.path .. " is not a number")
+        end
+        existing_d = existing_d - d
+        _set_by_path(cmd.state, cmd.path, existing_d)
+        return make_response(true)
+    end,
+    help =
+    "decr <key|path> <val>  --  decrement the value at the path by decr if the value is a number, val must be positive"
+}
+
 local try_do_command = function(state, str)
     if type(str) ~= "string" then
         return make_error("pass commands as a string, do list_cmd to see available commands")
@@ -201,6 +255,7 @@ local try_do_command = function(state, str)
 end
 
 return {
+    commands = commands.list_cmd.cmd().data,
     new_command_runner = function(state)
         return function(str)
             return try_do_command(state, str)

@@ -56,6 +56,34 @@ local tests = {
         local r1 = try_do("prepend a.b 1")
         local r2 = try_do("prepend a.b 2")
         return r1.data ~= nil and r2.data ~= nil and state.a.b[1] == 2 and state.a.b[2] == 1
+    end)(),
+    incr_nil = try_do("incr").error ~= nil,
+    incr_nonnumber = (function()
+        try_do("set a {}")
+        return try_do("incr a 1").error ~= nil
+    end)(),
+    incr_negative = (function()
+        try_do("set a 1")
+        return try_do("incr a -1").error ~= nil
+    end)(),
+    incr_val = (function()
+        try_do("set a 1")
+        try_do("incr a 1")
+        return state.a == 2
+    end)(),
+    decr_nil = try_do("decr").error ~= nil,
+    decr_nonnumber = (function()
+        try_do("set a {}")
+        return try_do("decr a 1").error ~= nil
+    end)(),
+    decr_negative = (function()
+        try_do("set a 1")
+        return try_do("decr a -1").error ~= nil
+    end)(),
+    decr_val = (function()
+        try_do("set a 1")
+        try_do("decr a 1")
+        return state.a == 0
     end)()
 }
 
