@@ -84,7 +84,6 @@ local handle_connection_timeout = function()
     while true do
         for k, v in pairs(connections) do
             if (os.epoch("utc") - v.last_msg_time) / 1000 > connection_timeout then
-                state[v.client_id] = nil
                 connections[k] = nil
             end
         end
