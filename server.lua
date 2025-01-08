@@ -30,17 +30,25 @@ local main = function()
             local connection = listener:accept("memdb connection established", p2)
             connections[connection.id] = {
                 conn = connection,
-                last_msg_time = os.epoch("utc")
+                last_msg_time = os.epoch("utc"),
             }
-            state[connection.id] = {
-                data = {}
-            }
-            state[connection.id].runner = c.new_command_runner(state[connection.id].data)
         elseif event == "ecnet2_message" and connections[id].conn then
-            print("got", p3, "on channel", ch, "from", dist, "blocks away")
-            local res = state[id].runner(p3)
-            connections[id].conn:send(textutils.serialize(res))
-            connections[id].last_msg_time = os.epoch("utc")
+            local parsed_for_id = string.gmatch(p3, "client_id=(%w+)")()
+            if parsed_for_id then
+                connections[id].client_id = parsed_for_id
+                connections[id].conn:send("ok")
+                if not state[parsed_for_id] then
+                    state[parsed_for_id] = {
+                        data = {}
+                    }
+                    state[parsed_for_id].runner = c.new_command_runner(state[parsed_for_id].data)
+                end
+            else
+                print("got", "'" .. p3 .. "'", "on channel", ch, "from", dist, "blocks away")
+                local res = state[connections[id].client_id].runner(p3)
+                connections[id].conn:send(textutils.serialize(res))
+                connections[id].last_msg_time = os.epoch("utc")
+            end
         end
     end
 end
@@ -49,8 +57,8 @@ local handle_timeout = function()
     while true do
         for k, v in pairs(connections) do
             if (os.epoch("utc") - v.last_msg_time) / 1000 > connection_timeout then
+                state[v.client_id] = nil
                 connections[k] = nil
-                state[k] = nil
             end
         end
         os.sleep(1)

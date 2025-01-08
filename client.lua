@@ -16,11 +16,14 @@ local memdb = id:Protocol {
 }
 
 local server = "tOAiD4vaW0MwpOxYnriAUcoW7lEhGgt7P7cUo9QgUSs="
+local client_id = "abcdefhijklmnop"
 
 local main = function()
     local connection = memdb:connect(server, "top")
 
     print(select(2, connection:receive()))
+
+    connection:send("client_id=" .. client_id)
 
     while true do
         connection:send(read())

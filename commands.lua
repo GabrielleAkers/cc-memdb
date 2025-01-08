@@ -92,7 +92,7 @@ commands.set = {
         if not cmd.path then
             return make_error("set requires a path")
         end
-        if cmd.data == nil then
+        if cmd.data == nil or cmd.data == "nil" then
             return make_error("cant set nil value")
         end
         _set_by_path(cmd.state, cmd.path, cmd.data)
@@ -106,7 +106,7 @@ commands.safe_set = {
         if not cmd.path then
             return make_error("safe_set requires a path")
         end
-        if cmd.data == nil then
+        if cmd.data == nil or cmd.data == "nil" then
             return make_error("cant safe_set nil value")
         end
         if not cmd.id then
@@ -146,7 +146,7 @@ commands.append = {
         if not cmd.path then
             return make_error("append requires a path")
         end
-        if cmd.data == nil then
+        if cmd.data == nil or cmd.data == "nil" then
             return make_error("cannot append nil")
         end
         local d = _get_by_path(cmd.state, cmd.path)
@@ -165,7 +165,7 @@ commands.prepend = {
         if not cmd.path then
             return make_error("prepend requires a path")
         end
-        if cmd.data == nil then
+        if cmd.data == nil or cmd.data == "nil" then
             return make_error("cannot prepend nil")
         end
         local d = _get_by_path(cmd.state, cmd.path)
@@ -184,7 +184,7 @@ commands.incr = {
         if not cmd.path then
             return make_error("prepend requires a path")
         end
-        if cmd.data == nil then
+        if cmd.data == nil or cmd.data == "nil" then
             return make_error("cannot incr nil")
         end
         local d = textutils.unserialise(cmd.data)
@@ -211,7 +211,7 @@ commands.decr = {
         if not cmd.path then
             return make_error("prepend requires a path")
         end
-        if cmd.data == nil then
+        if cmd.data == nil or cmd.data == "nil" then
             return make_error("cannot decr nil")
         end
         local d = textutils.unserialise(cmd.data)

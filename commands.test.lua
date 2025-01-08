@@ -8,6 +8,7 @@ local tests = {
     get_no_key = try_do("get").error ~= nil,
     set_no_key = try_do("set").error ~= nil,
     set_no_val = try_do("set a").error ~= nil,
+    set_nil = try_do("set v nil").error ~= nil,
     set_val = try_do("set a 1").data ~= nil,
     get_val = try_do("get a").data == 1,
     get_id = try_do("get_id a").data ~= nil,
