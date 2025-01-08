@@ -28,7 +28,7 @@ local main = function()
         if r.error then
             print("ERROR", r.error)
         elseif r.data and type(r.data) ~= "boolean" then
-            print("VALUE", r.data)
+            print("VALUE", textutils.serialize(r.data))
         end
     end
 end

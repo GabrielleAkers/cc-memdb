@@ -77,9 +77,7 @@ commands.get_id = {
 local _set_by_path = function(t, path, val)
     local p, k
     for s in string.gmatch(path, "[^%.]+") do
-        if not t[s] then
-            t[s] = {}
-        end
+        t[s] = {}
         k, p, t = s, t, t[s]
     end
     if type(val) == "string" then
