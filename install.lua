@@ -209,9 +209,7 @@ function installer.downloadPacked(filename, branch, ignoreList, minify)
     printStatus("Packed version successfully downloaded!")
 end
 
-if (#args > 0) then
-    installer.downloadPacked(args[1] or "memdb.lua", args[2] or "master",
-        args[3] ~= nil and installer.createIgnoreList(args[3]) or nil, args[4] == "false" and false or true)
-end
+installer.downloadPacked(args[1] or "memdb.lua", args[2] or "master",
+    args[3] ~= nil and installer.createIgnoreList(args[3]) or nil, args[4] == "false" and false or true)
 
 return installer
