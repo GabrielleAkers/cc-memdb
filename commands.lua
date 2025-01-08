@@ -118,7 +118,7 @@ commands.safe_set = {
             return make_error("cant safe_set nil value")
         end
         if not cmd.id then
-            return make_error("safe_set requires and id")
+            return make_error("safe_set requires an id")
         end
         local id = commands.get_id.cmd(cmd)
         if id.error then

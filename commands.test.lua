@@ -17,6 +17,14 @@ local tests = {
     get_id = try_do("get_id a").data ~= nil,
     safe_set_fakeid = not try_do("safe_set a 2 fake_id").data ~= nil,
     safe_set = try_do("safe_set a 2 " .. try_do("get_id a").data).data ~= nil,
+    safe_set_changed_in_between = (function()
+        try_do("set a 1")
+        local id = try_do("get_id a").data
+        try_do("set a 2")
+        local r1 = try_do("safe_set a 3 " .. id).data == false
+        local r2 = try_do("get a").data == 2
+        return r1 and r2
+    end)(),
     set_path = try_do("set b.c.d 4").data ~= nil,
     get_path = try_do("get b.c.d").data == 4,
     set_path_table = try_do("set b.c.d {e=false}").data ~= nil,
