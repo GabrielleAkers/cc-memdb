@@ -34,8 +34,6 @@ local getProject = function(subDir)
 end
 ]]
 
-local projectContentEnd = '\nreturn project["main"]()'
-
 local function split(s, delimiter)
     local result = {}
     if (s ~= nil) then
@@ -67,6 +65,9 @@ local function printStatus(...)
 end
 
 function installer.get(url)
+    if not url then
+        return ""
+    end
     local httpReq = http.get(url, _G._GIT_API_KEY and { Authorization = "token " .. _G._GIT_API_KEY })
     printStatus("Downloading " .. url)
     if (httpReq ~= nil) then
@@ -95,7 +96,7 @@ function installer.createTree(page, branch, dirName, ignList)
                     {
                         name = v.path,
                         path = filePath,
-                        url = installer.githubPath .. branch .. "/cc-memdb/" .. filePath,
+                        url = installer.githubPath .. branch .. "/" .. filePath,
                         size =
                             v.size
                     })
@@ -110,20 +111,6 @@ function installer.createTree(page, branch, dirName, ignList)
     return tree
 end
 
-function installer.createIgnoreList(str)
-    local files = split(str, ":")
-    local ignList = {}
-    for k, v in pairs(files) do
-        local a = split(v, "/")
-        if (#a > 1) then
-            if (ignList[a[1]] == nil) then ignList[a[1]] = {} end
-            table.insert(ignList[a[1]], a[2])
-        else
-            table.insert(ignList, v)
-        end
-    end
-end
-
 function installer.getPackedProject(branch, ignoreList)
     if (ignoreList == nil) then
         ignoreList = { "init.lua" }
@@ -131,13 +118,14 @@ function installer.getPackedProject(branch, ignoreList)
         table.insert(ignoreList, "init.lua")
     end
     local projTree = installer.createTree("https://api.github.com/repos/GabrielleAkers/cc-memdb/git/trees/" ..
-        branch .. ":cc-memdb", branch, "", ignoreList)
+        branch, branch, "", ignoreList)
     local project = {}
 
     local fList = {}
     local delay = 0
     for k, v in pairs(projTree) do
         if (type(k) == "string") then
+            print("getting a string", k)
             for a, b in pairs(v) do
                 table.insert(fList, function()
                     sleep(delay)
@@ -148,6 +136,7 @@ function installer.getPackedProject(branch, ignoreList)
                 end)
             end
         else
+            print("getting a not string", k)
             table.insert(fList,
                 function()
                     sleep(delay)
@@ -167,9 +156,13 @@ function installer.getPackedProject(branch, ignoreList)
             local newSubDir = 'project["' .. k .. '"] = {}\n'
             projectContent = projectContent .. "\n" .. newSubDir
             for a, b in pairs(v) do
+                if b == nil or b.name == nil or b.content == nil then
+                    goto continue
+                end
                 local newFile = 'project["' ..
                     k .. '"]["' .. b.name:gsub(".lua", "") .. '"] = function(...)\n' .. b.content .. '\nend'
                 projectContent = projectContent .. "\n" .. newFile
+                ::continue::
             end
         else
             local newFile = 'project["' .. v.name:gsub(".lua", "") .. '"] = function(...)\n' .. v.content .. '\nend'
@@ -209,7 +202,8 @@ function installer.downloadPacked(filename, branch, ignoreList, minify)
     printStatus("Packed version successfully downloaded!")
 end
 
-installer.downloadPacked(args[1] or "memdb.lua", args[2] or "master",
-    args[3] ~= nil and installer.createIgnoreList(args[3]) or nil, args[4] == "false" and false or true)
+installer.downloadPacked(args[1] or "memdb.lua", args[2] or "main",
+    { "README.md", "LICENSE", ".gitignore", "install.lua", "packager.lua", "commands.test.lua" },
+    args[3] == "false" and false or true)
 
 return installer

@@ -47,4 +47,16 @@ local main = function()
     end
 end
 
-parallel.waitForAny(main, ecnet2.daemon)
+local run_client = function()
+    while true do
+        parallel.waitForAny(main, ecnet2.daemon)
+    end
+end
+
+if pcall(debug.getlocal, 4, 1) then
+    return {
+        run_client = run_client
+    }
+else
+    run_client()
+end

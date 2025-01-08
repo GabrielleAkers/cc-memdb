@@ -92,4 +92,16 @@ local handle_connection_timeout = function()
     end
 end
 
-parallel.waitForAny(main, ecnet2.daemon, handle_connection_timeout, handle_cache_invalidation)
+local run_server = function()
+    while true do
+        parallel.waitForAny(main, ecnet2.daemon, handle_connection_timeout, handle_cache_invalidation)
+    end
+end
+
+if pcall(debug.getlocal, 4, 1) then
+    return {
+        run_server = run_server
+    }
+else
+    run_server()
+end
