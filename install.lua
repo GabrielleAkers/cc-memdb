@@ -192,7 +192,7 @@ function installer.downloadPacked(filename, branch, ignoreList, minify)
             f.close()
         else
             min = load(installer.get(
-                "https://raw.githubusercontent.com/GabrielleAkers/cc-memdb/master/docs/packager.lua"))()
+                "https://raw.githubusercontent.com/GabrielleAkers/cc-memdb/refs/heads/main/packager.lua"))()
         end
         if (min ~= nil) then
             local success, data = min(projectContent)
