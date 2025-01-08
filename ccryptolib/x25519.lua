@@ -1,9 +1,9 @@
 --- The X25519 key exchange scheme.
 
 local expect = require "cc.expect".expect
-local lassert = require "ccryptolib.internal.util".lassert
-local util = require "ccryptolib.internal.util"
-local c25 = require "ccryptolib.internal.curve25519"
+local lassert = require "ccryptolib.int_util".lassert
+local util = require "ccryptolib.int_util"
+local c25 = require "ccryptolib.int_curve25519"
 
 --- Computes the public key from a secret key.
 --- @param sk string A random 32-byte secret key.

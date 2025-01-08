@@ -1,20 +1,20 @@
 --- The SHA256 cryptographic hash function.
 
-local expect  = require "cc.expect".expect
-local lassert = require "ccryptolib.internal.util".lassert
-local packing = require "ccryptolib.internal.packing"
+local expect         = require "cc.expect".expect
+local lassert        = require "ccryptolib.int_util".lassert
+local packing        = require "ccryptolib.int_packing"
 
-local rol = bit32.lrotate
-local shr = bit32.rshift
-local bxor = bit32.bxor
-local bnot = bit32.bnot
-local band = bit32.band
-local unpack = unpack or table.unpack
-local p1x8, fmt1x8 = packing.compilePack(">I8")
+local rol            = bit32.lrotate
+local shr            = bit32.rshift
+local bxor           = bit32.bxor
+local bnot           = bit32.bnot
+local band           = bit32.band
+local unpack         = unpack or table.unpack
+local p1x8, fmt1x8   = packing.compilePack(">I8")
 local p16x4, fmt16x4 = packing.compilePack(">I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4")
-local u16x4 = packing.compileUnpack(fmt16x4)
-local p8x4, fmt8x4 = packing.compilePack(">I4I4I4I4I4I4I4I4")
-local u8x4 = packing.compileUnpack(fmt8x4)
+local u16x4          = packing.compileUnpack(fmt16x4)
+local p8x4, fmt8x4   = packing.compilePack(">I4I4I4I4I4I4I4I4")
+local u8x4           = packing.compileUnpack(fmt8x4)
 
 local function primes(n, exp)
     local out = {}
@@ -89,7 +89,7 @@ local function digest(data)
     -- Digest.
     local h = h0
     for i = 1, #data, 64 do
-        h = compress(h, {u16x4(fmt16x4, data, i)})
+        h = compress(h, { u16x4(fmt16x4, data, i) })
     end
 
     return p8x4(fmt8x4, unpack(h))
@@ -114,7 +114,7 @@ local function pbkdf2(password, salt, iter, progress)
 
     -- Pad password.
     if #password > 64 then password = digest(password) end
-    password = {u16x4(fmt16x4, password .. ("\0"):rep(64), 1)}
+    password = { u16x4(fmt16x4, password .. ("\0"):rep(64), 1) }
 
     -- Compute password blocks.
     local ikp = {}
@@ -128,16 +128,16 @@ local function pbkdf2(password, salt, iter, progress)
     local hokp = compress(h0, okp)
 
     -- 96-byte padding.
-    local pad96 = {2 ^ 31, 0, 0, 0, 0, 0, 0, 0x300}
+    local pad96 = { 2 ^ 31, 0, 0, 0, 0, 0, 0, 0x300 }
 
     -- First iteration.
     local pre = p16x4(fmt16x4, unpack(ikp))
-    local hs = {u8x4(fmt8x4, digest(pre .. salt .. "\0\0\0\1"), 1)}
+    local hs = { u8x4(fmt8x4, digest(pre .. salt .. "\0\0\0\1"), 1) }
     for i = 1, 8 do hs[i + 8] = pad96[i] end
     hs = compress(hokp, hs)
 
     -- Second iteration onwards.
-    local out = {unpack(hs)}
+    local out = { unpack(hs) }
     for i = 2, iter do
         for j = 1, 8 do hs[j + 8] = pad96[j] end
         hs = compress(hikp, hs)

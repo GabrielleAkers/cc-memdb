@@ -1,7 +1,7 @@
 --- Point arithmetic on the Curve25519 Montgomery curve.
 
-local fp = require "ccryptolib.internal.fp"
-local ed = require "ccryptolib.internal.edwards25519"
+local fp = require "ccryptolib.int_fp"
+local ed = require "ccryptolib.int_edwards25519"
 local random = require "ccryptolib.random"
 
 --- @class MtPoint A point class on Curve25519, in XZ coordinates.
@@ -20,7 +20,7 @@ local function double(P1)
     local c = fp.sub(aa, bb)
     local x3 = fp.mul(aa, bb)
     local z3 = fp.mul(c, fp.add(bb, fp.kmul(c, 121666)))
-    return {x3, z3}
+    return { x3, z3 }
 end
 
 --- Computes differential addition on two points.
@@ -40,7 +40,7 @@ local function dadd(DP, P1, P2)
     local cb = fp.mul(c, b)
     local x3 = fp.mul(dz, fp.square(fp.add(da, cb)))
     local z3 = fp.mul(dx, fp.square(fp.sub(da, cb)))
-    return {x3, z3}
+    return { x3, z3 }
 end
 
 --- Performs a step on the Montgomery ladder.
@@ -66,11 +66,11 @@ local function step(DP, P1, P2)
     local z4 = fp.mul(dx, fp.square(fp.sub(da, cb)))
     local x3 = fp.mul(aa, bb)
     local z3 = fp.mul(e, fp.add(bb, fp.kmul(e, 121666)))
-    return {x3, z3}, {x4, z4}
+    return { x3, z3 }, { x4, z4 }
 end
 
 local function ladder(DP, bits)
-    local P = {fp.num(1), fp.num(0)}
+    local P = { fp.num(1), fp.num(0) }
     local Q = DP
 
     for i = #bits, 1, -1 do
@@ -91,7 +91,7 @@ end
 local function ladder8(P, bits)
     -- Randomize.
     local rf = fp.decode(random.random(32) --[[@as String32, length is given]])
-    P = {fp.mul(P[1], rf), fp.mul(P[2], rf)}
+    P = { fp.mul(P[1], rf), fp.mul(P[2], rf) }
 
     -- Multiply.
     return double(double(double(ladder(P, bits))))
@@ -101,7 +101,7 @@ end
 --- @param P MtPoint The input point.
 --- @return MtPoint Q The same point P, but with Z = 1.
 local function scale(P)
-    return {fp.mul(P[1], fp.invert(P[2])), fp.num(1)}
+    return { fp.mul(P[1], fp.invert(P[2])), fp.num(1) }
 end
 
 --- Encodes a scaled point.
@@ -115,7 +115,7 @@ end
 --- @param str String32 A 32-byte encoded point.
 --- @return MtPoint pt The decoded point.
 local function decode(str)
-    return {fp.decode(str), fp.num(1)}
+    return { fp.decode(str), fp.num(1) }
 end
 
 --- Decodes an Edwards25519 encoded point into Curve25519, ignoring the sign.
@@ -130,9 +130,9 @@ local function decodeEd(str)
     local n = fp.carry(fp.add(fp.num(1), y))
     local d = fp.carry(fp.sub(fp.num(1), y))
     if fp.eqz(d) then
-        return {fp.num(0), fp.num(1)}
+        return { fp.num(0), fp.num(1) }
     else
-        return {n, d}
+        return { n, d }
     end
 end
 
@@ -149,7 +149,7 @@ local function mulG(bits)
     local Rx = fp.carry(fp.add(Py, Pz))
     local Rz = fp.carry(fp.sub(Pz, Py))
 
-    return {Rx, Rz}
+    return { Rx, Rz }
 end
 
 --- Computes a twofold product from a ruleset.
@@ -164,7 +164,7 @@ end
 local function prac(P, ruleset)
     -- Randomize.
     local rf = fp.decode(random.random(32) --[[@as String32, length is given]])
-    local A = {fp.mul(P[1], rf), fp.mul(P[2], rf)}
+    local A = { fp.mul(P[1], rf), fp.mul(P[2], rf) }
 
     -- Start the base at [8]P.
     local A = double(double(double(A)))
@@ -277,7 +277,7 @@ local function prac(P, ruleset)
 end
 
 return {
-    G = {fp.num(9), fp.num(1)},
+    G = { fp.num(9), fp.num(1) },
     dadd = dadd,
     scale = scale,
     encode = encode,

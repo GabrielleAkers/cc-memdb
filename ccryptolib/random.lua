@@ -1,12 +1,12 @@
-local expect   = require "cc.expect".expect
-local blake3   = require "ccryptolib.blake3"
-local chacha20 = require "ccryptolib.chacha20"
-local util     = require "ccryptolib.internal.util"
+local expect      = require "cc.expect".expect
+local blake3      = require "ccryptolib.blake3"
+local chacha20    = require "ccryptolib.chacha20"
+local util        = require "ccryptolib.int_util"
 
-local lassert = util.lassert
+local lassert     = util.lassert
 
 -- Extract local context.
-local ctx = {
+local ctx         = {
     "ccryptolib 2023-04-11T19:43Z random.lua initialization context",
     os.epoch("utc"),
     os.day(),
@@ -17,7 +17,7 @@ local ctx = {
     tostring({}),
 }
 
-local state = blake3.digest(table.concat(ctx, "|"))
+local state       = blake3.digest(table.concat(ctx, "|"))
 local initialized = false
 
 --- Mixes entropy into the generator, and marks it as initialized.
@@ -40,7 +40,7 @@ end
 --- millisecond, and mixes the lower bits of these values into the generator state.
 --- The current implementation collects data for 512 ms and takes the lower 8 bits from
 --- each count.
---- 
+---
 --- Compared to fetching entropy from a trusted web source, this approach is riskier but
 --- more convenient. The factors that influence instruction timing suggest that this
 --- seed is unpredictable for other players, but this assumption might turn out to be
@@ -86,7 +86,7 @@ end
 
 --- Generates random bytes.
 --- @param len number The desired output length.
---- @return string bytes 
+--- @return string bytes
 local function random(len)
     expect(1, len, "number")
     lassert(initialized, "attempt to use an uninitialized random generator", 2)

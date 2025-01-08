@@ -1,13 +1,13 @@
 --- The SHA512 cryptographic hash function.
 
-local expect  = require "cc.expect".expect
-local packing = require "ccryptolib.internal.packing"
+local expect         = require "cc.expect".expect
+local packing        = require "ccryptolib.int_packing"
 
-local shl = bit32.lshift
-local shr = bit32.rshift
-local bxor = bit32.bxor
-local bnot = bit32.bnot
-local band = bit32.band
+local shl            = bit32.lshift
+local shr            = bit32.rshift
+local bxor           = bit32.bxor
+local bnot           = bit32.bnot
+local band           = bit32.band
 local p1x16, fmt1x16 = packing.compilePack(">I16")
 local p16x4, fmt16x4 = packing.compilePack(">I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4")
 local u32x4, fmt32x4 = packing.compileUnpack(">I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4")
@@ -71,7 +71,7 @@ local function digest(data)
 
     -- Digest.
     for i = 1, #data, 128 do
-        local w = {u32x4(fmt32x4, data, i)}
+        local w = { u32x4(fmt32x4, data, i) }
 
         -- Message schedule.
         for j = 33, 160, 2 do
@@ -138,13 +138,19 @@ local function digest(data)
             local temp21 = s01 + maj1
             local temp20 = s00 + maj0
 
-            h1 = g1  h0 = g0
-            g1 = f1  g0 = f0
-            f1 = e1  f0 = e0
+            h1 = g1
+            h0 = g0
+            g1 = f1
+            g0 = f0
+            f1 = e1
+            f0 = e0
             e1, e0 = carry64(d1 + temp11, d0 + temp10)
-            d1 = c1  d0 = c0
-            c1 = b1  c0 = b0
-            b1 = a1  b0 = a0
+            d1 = c1
+            d0 = c0
+            c1 = b1
+            c0 = b0
+            b1 = a1
+            b0 = a0
             a1, a0 = carry64(temp11 + temp21, temp10 + temp20)
         end
 

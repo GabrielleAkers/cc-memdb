@@ -1,6 +1,6 @@
 --- Point arithmetic on the Edwards25519 Edwards curve.
 
-local fp = require "ccryptolib.internal.fp"
+local fp = require "ccryptolib.int_fp"
 
 local unpack = unpack or table.unpack
 
@@ -20,7 +20,7 @@ local D = fp.mul(fp.num(-121665), fp.invert(fp.num(121666)))
 local K = fp.kmul(D, 2)
 
 --- @type EdPoint
-local O = {fp.num(0), fp.num(1), fp.num(1), fp.num(0)}
+local O = { fp.num(0), fp.num(1), fp.num(1), fp.num(0) }
 local G = nil
 
 --- Doubles a point.
@@ -45,7 +45,7 @@ local function double(P1)
     local P3y = fp.mul(i, e)
     local P3z = fp.mul(j, i)
     local P3t = fp.mul(h, e)
-    return {P3x, P3y, P3z, P3t}
+    return { P3x, P3y, P3z, P3t }
 end
 
 --- Adds two points.
@@ -69,7 +69,7 @@ local function add(P1, N2)
     local P3y = fp.mul(i, j)
     local P3z = fp.mul(h, i)
     local P3t = fp.mul(g, j)
-    return {P3x, P3y, P3z, P3t}
+    return { P3x, P3y, P3z, P3t }
 end
 
 --- Subtracts one point from another.
@@ -93,7 +93,7 @@ local function sub(P1, N2)
     local P3y = fp.mul(i, j)
     local P3z = fp.mul(h, i)
     local P3t = fp.mul(g, j)
-    return {P3x, P3y, P3z, P3t}
+    return { P3x, P3y, P3z, P3t }
 end
 
 --- Computes the Niels representation of a point.
@@ -105,7 +105,7 @@ local function niels(P1)
     local N3m = fp.sub(P1y, P1x)
     local N3z = fp.add(P1z, P1z)
     local N3t = fp.mul(P1t, K)
-    return {N3p, N3m, N3z, N3t}
+    return { N3p, N3m, N3z, N3t }
 end
 
 --- Scales a point.
@@ -118,7 +118,7 @@ local function scale(P1)
     local P3y = fp.mul(P1y, zInv)
     local P3z = fp.num(1)
     local P3t = fp.mul(P3x, P3y)
-    return {P3x, P3y, P3z, P3t}
+    return { P3x, P3y, P3z, P3t }
 end
 
 --- Encodes a scaled point.
@@ -149,7 +149,7 @@ local function decode(str)
     end
     local P3z = fp.num(1)
     local P3t = fp.mul(P3x, P3y)
-    return {P3x, P3y, P3z, P3t}
+    return { P3x, P3y, P3z, P3t }
 end
 
 G = decode("Xfffffffffffffffffffffffffffffff") --[[@as EdPoint, G is valid]]
@@ -186,7 +186,7 @@ end
 local function radixWTable(P, w)
     local out = {}
     for i = 1, math.ceil(256 / w) do
-        local row = {niels(P)}
+        local row = { niels(P) }
         for j = 2, 2 ^ w / 2 do
             P = add(P, row[1])
             row[j] = niels(P)
@@ -244,7 +244,7 @@ end
 --- @return NsPoint[]
 local function WNAFTable(P, w)
     local dP = double(P)
-    local out = {niels(P)}
+    local out = { niels(P) }
     for i = 3, 2 ^ w, 2 do
         out[i] = niels(add(dP, out[i - 2]))
     end

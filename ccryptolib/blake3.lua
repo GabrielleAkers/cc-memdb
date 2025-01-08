@@ -1,8 +1,8 @@
 --- The BLAKE3 cryptographic hash function.
 
 local expect = require "cc.expect".expect
-local lassert = require "ccryptolib.internal.util".lassert
-local packing = require "ccryptolib.internal.packing"
+local lassert = require "ccryptolib.int_util".lassert
+local packing = require "ccryptolib.int_packing"
 
 local unpack = unpack or table.unpack
 local bxor = bit32.bxor
@@ -33,49 +33,81 @@ local function compress(h, msg, t, v14, v15, full)
     local v13 = (t - v12) * 2 ^ -32
 
     local m00, m01, m02, m03, m04, m05, m06, m07,
-          m08, m09, m10, m11, m12, m13, m14, m15 = unpack(msg)
+    m08, m09, m10, m11, m12, m13, m14, m15 = unpack(msg)
 
     local tmp
     for i = 1, 7 do
-        v00 = v00 + v04 + m00 v12 = rol(bxor(v12, v00), 16)
-        v08 = v08 + v12       v04 = rol(bxor(v04, v08), 20)
-        v00 = v00 + v04 + m01 v12 = rol(bxor(v12, v00), 24)
-        v08 = v08 + v12       v04 = rol(bxor(v04, v08), 25)
+        v00 = v00 + v04 + m00
+        v12 = rol(bxor(v12, v00), 16)
+        v08 = v08 + v12
+        v04 = rol(bxor(v04, v08), 20)
+        v00 = v00 + v04 + m01
+        v12 = rol(bxor(v12, v00), 24)
+        v08 = v08 + v12
+        v04 = rol(bxor(v04, v08), 25)
 
-        v01 = v01 + v05 + m02 v13 = rol(bxor(v13, v01), 16)
-        v09 = v09 + v13       v05 = rol(bxor(v05, v09), 20)
-        v01 = v01 + v05 + m03 v13 = rol(bxor(v13, v01), 24)
-        v09 = v09 + v13       v05 = rol(bxor(v05, v09), 25)
+        v01 = v01 + v05 + m02
+        v13 = rol(bxor(v13, v01), 16)
+        v09 = v09 + v13
+        v05 = rol(bxor(v05, v09), 20)
+        v01 = v01 + v05 + m03
+        v13 = rol(bxor(v13, v01), 24)
+        v09 = v09 + v13
+        v05 = rol(bxor(v05, v09), 25)
 
-        v02 = v02 + v06 + m04 v14 = rol(bxor(v14, v02), 16)
-        v10 = v10 + v14       v06 = rol(bxor(v06, v10), 20)
-        v02 = v02 + v06 + m05 v14 = rol(bxor(v14, v02), 24)
-        v10 = v10 + v14       v06 = rol(bxor(v06, v10), 25)
+        v02 = v02 + v06 + m04
+        v14 = rol(bxor(v14, v02), 16)
+        v10 = v10 + v14
+        v06 = rol(bxor(v06, v10), 20)
+        v02 = v02 + v06 + m05
+        v14 = rol(bxor(v14, v02), 24)
+        v10 = v10 + v14
+        v06 = rol(bxor(v06, v10), 25)
 
-        v03 = v03 + v07 + m06 v15 = rol(bxor(v15, v03), 16)
-        v11 = v11 + v15       v07 = rol(bxor(v07, v11), 20)
-        v03 = v03 + v07 + m07 v15 = rol(bxor(v15, v03), 24)
-        v11 = v11 + v15       v07 = rol(bxor(v07, v11), 25)
+        v03 = v03 + v07 + m06
+        v15 = rol(bxor(v15, v03), 16)
+        v11 = v11 + v15
+        v07 = rol(bxor(v07, v11), 20)
+        v03 = v03 + v07 + m07
+        v15 = rol(bxor(v15, v03), 24)
+        v11 = v11 + v15
+        v07 = rol(bxor(v07, v11), 25)
 
-        v00 = v00 + v05 + m08 v15 = rol(bxor(v15, v00), 16)
-        v10 = v10 + v15       v05 = rol(bxor(v05, v10), 20)
-        v00 = v00 + v05 + m09 v15 = rol(bxor(v15, v00), 24)
-        v10 = v10 + v15       v05 = rol(bxor(v05, v10), 25)
+        v00 = v00 + v05 + m08
+        v15 = rol(bxor(v15, v00), 16)
+        v10 = v10 + v15
+        v05 = rol(bxor(v05, v10), 20)
+        v00 = v00 + v05 + m09
+        v15 = rol(bxor(v15, v00), 24)
+        v10 = v10 + v15
+        v05 = rol(bxor(v05, v10), 25)
 
-        v01 = v01 + v06 + m10 v12 = rol(bxor(v12, v01), 16)
-        v11 = v11 + v12       v06 = rol(bxor(v06, v11), 20)
-        v01 = v01 + v06 + m11 v12 = rol(bxor(v12, v01), 24)
-        v11 = v11 + v12       v06 = rol(bxor(v06, v11), 25)
+        v01 = v01 + v06 + m10
+        v12 = rol(bxor(v12, v01), 16)
+        v11 = v11 + v12
+        v06 = rol(bxor(v06, v11), 20)
+        v01 = v01 + v06 + m11
+        v12 = rol(bxor(v12, v01), 24)
+        v11 = v11 + v12
+        v06 = rol(bxor(v06, v11), 25)
 
-        v02 = v02 + v07 + m12 v13 = rol(bxor(v13, v02), 16)
-        v08 = v08 + v13       v07 = rol(bxor(v07, v08), 20)
-        v02 = v02 + v07 + m13 v13 = rol(bxor(v13, v02), 24)
-        v08 = v08 + v13       v07 = rol(bxor(v07, v08), 25)
+        v02 = v02 + v07 + m12
+        v13 = rol(bxor(v13, v02), 16)
+        v08 = v08 + v13
+        v07 = rol(bxor(v07, v08), 20)
+        v02 = v02 + v07 + m13
+        v13 = rol(bxor(v13, v02), 24)
+        v08 = v08 + v13
+        v07 = rol(bxor(v07, v08), 25)
 
-        v03 = v03 + v04 + m14 v14 = rol(bxor(v14, v03), 16)
-        v09 = v09 + v14       v04 = rol(bxor(v04, v09), 20)
-        v03 = v03 + v04 + m15 v14 = rol(bxor(v14, v03), 24)
-        v09 = v09 + v14       v04 = rol(bxor(v04, v09), 25)
+        v03 = v03 + v04 + m14
+        v14 = rol(bxor(v14, v03), 16)
+        v09 = v09 + v14
+        v04 = rol(bxor(v04, v09), 20)
+        v03 = v03 + v04 + m15
+        v14 = rol(bxor(v14, v03), 24)
+        v09 = v09 + v14
+        v04 = rol(bxor(v04, v09), 25)
 
         if i ~= 7 then
             tmp = m02
@@ -132,7 +164,7 @@ local function blake3(iv, flags, msg, len)
     -- Digest complete blocks.
     for i = 1, #msg - 64, 64 do
         -- Compress the block.
-        local block = {u16x4(fmt16x4, msg, i)}
+        local block = { u16x4(fmt16x4, msg, i) }
         local stateFlags = flags + stateStart + stateEnd
         stateCv = compress(stateCv, block, stateT, 64, stateFlags)
         stateStart = 0
@@ -166,7 +198,7 @@ local function blake3(iv, flags, msg, len)
     -- Pad the last message block.
     local lastLen = #msg == 0 and 0 or (#msg - 1) % 64 + 1
     local padded = msg:sub(-lastLen) .. ("\0"):rep(64)
-    local last = {u16x4(fmt16x4, padded, 1)}
+    local last = { u16x4(fmt16x4, padded, 1) }
 
     -- Prepare output expansion state.
     local outCv, outBlock, outLen, outFlags
@@ -226,7 +258,7 @@ local function digestKeyed(key, message, len)
     len = expect(3, len, "number", "nil") or 32
     lassert(len % 1 == 0, "desired output length must be an integer", 2)
     lassert(len >= 1, "desired output length must be positive", 2)
-    return blake3({u8x4(fmt8x4, key, 1)}, KEYED_HASH, message, len)
+    return blake3({ u8x4(fmt8x4, key, 1) }, KEYED_HASH, message, len)
 end
 
 --- Makes a context-based key derivation function (KDF).
@@ -234,7 +266,7 @@ end
 --- @return fun(material: string, len: number?): string kdf The KDF.
 local function deriveKey(context)
     expect(1, context, "string")
-    local iv = {u8x4(fmt8x4, blake3(IV, DERIVE_KEY_CONTEXT, context, 32), 1)}
+    local iv = { u8x4(fmt8x4, blake3(IV, DERIVE_KEY_CONTEXT, context, 32), 1) }
 
     --- Derives a key.
     --- @param material string The keying material.

@@ -1,14 +1,14 @@
 --- The ChaCha20Poly1305AEAD authenticated encryption with associated data (AEAD) construction.
 
-local expect   = require "cc.expect".expect
-local lassert = require "ccryptolib.internal.util".lassert
-local packing  = require "ccryptolib.internal.packing"
-local chacha20 = require "ccryptolib.chacha20"
-local poly1305 = require "ccryptolib.poly1305"
+local expect       = require "cc.expect".expect
+local lassert      = require "ccryptolib.int_util".lassert
+local packing      = require "ccryptolib.int_packing"
+local chacha20     = require "ccryptolib.chacha20"
+local poly1305     = require "ccryptolib.poly1305"
 
 local p8x1, fmt8x1 = packing.compilePack("<I8")
 local u4x4, fmt4x4 = packing.compileUnpack("<I4I4I4I4")
-local bxor = bit32.bxor
+local bxor         = bit32.bxor
 
 --- Encrypts a message.
 --- @param key string A 32-byte random key.
@@ -37,8 +37,8 @@ local function encrypt(key, nonce, message, aad, rounds)
     local ciphertext = ctxLong:sub(65)
 
     -- Authenticate.
-    local pad1 = ("\0"):rep(-#aad % 16)
-    local pad2 = ("\0"):rep(-#ciphertext % 16)
+    local pad1 = ("\0"):rep(- #aad % 16)
+    local pad2 = ("\0"):rep(- #ciphertext % 16)
     local aadLen = p8x1("<I8", #aad)
     local ctxLen = p8x1("<I8", #ciphertext)
     local combined = aad .. pad1 .. ciphertext .. pad2 .. aadLen .. ctxLen
@@ -73,8 +73,8 @@ local function decrypt(key, nonce, tag, ciphertext, aad, rounds)
     local authKey = chacha20.crypt(key, nonce, ("\0"):rep(32), rounds, 0)
 
     -- Check tag.
-    local pad1 = ("\0"):rep(-#aad % 16)
-    local pad2 = ("\0"):rep(-#ciphertext % 16)
+    local pad1 = ("\0"):rep(- #aad % 16)
+    local pad2 = ("\0"):rep(- #ciphertext % 16)
     local aadLen = p8x1(fmt8x1, #aad)
     local ctxLen = p8x1(fmt8x1, #ciphertext)
     local combined = aad .. pad1 .. ciphertext .. pad2 .. aadLen .. ctxLen

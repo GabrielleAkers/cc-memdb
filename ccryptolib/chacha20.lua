@@ -1,15 +1,15 @@
 --- The ChaCha20 stream cipher.
 
-local expect  = require "cc.expect".expect
-local lassert = require "ccryptolib.internal.util".lassert
-local packing = require "ccryptolib.internal.packing"
+local expect         = require "cc.expect".expect
+local lassert        = require "ccryptolib.int_util".lassert
+local packing        = require "ccryptolib.int_packing"
 
-local bxor = bit32.bxor
-local rol = bit32.lrotate
-local u8x4, fmt8x4 = packing.compileUnpack("<I4I4I4I4I4I4I4I4")
-local u3x4, fmt3x4 = packing.compileUnpack("<I4I4I4")
+local bxor           = bit32.bxor
+local rol            = bit32.lrotate
+local u8x4, fmt8x4   = packing.compileUnpack("<I4I4I4I4I4I4I4I4")
+local u3x4, fmt3x4   = packing.compileUnpack("<I4I4I4")
 local p16x4, fmt16x4 = packing.compilePack("<I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4")
-local u16x4 = packing.compileUnpack(fmt16x4)
+local u16x4          = packing.compileUnpack(fmt16x4)
 
 --- Encrypts/Decrypts data using ChaCha20.
 --- @param key string A 32-byte random key.
@@ -39,7 +39,7 @@ local function crypt(key, nonce, message, rounds, offset)
     local cr, n0, n1, n2 = offset, u3x4(fmt3x4, nonce, 1)
 
     -- Pad the message.
-    local padded = message .. ("\0"):rep(-#message % 64)
+    local padded = message .. ("\0"):rep(- #message % 64)
 
     -- Expand and combine.
     local out = {}
@@ -53,45 +53,77 @@ local function crypt(key, nonce, message, rounds, offset)
 
         -- Iterate.
         for _ = 1, rounds, 2 do
-            s00 = s00 + s04 s12 = rol(bxor(s12, s00), 16)
-            s08 = s08 + s12 s04 = rol(bxor(s04, s08), 12)
-            s00 = s00 + s04 s12 = rol(bxor(s12, s00), 8)
-            s08 = s08 + s12 s04 = rol(bxor(s04, s08), 7)
+            s00 = s00 + s04
+            s12 = rol(bxor(s12, s00), 16)
+            s08 = s08 + s12
+            s04 = rol(bxor(s04, s08), 12)
+            s00 = s00 + s04
+            s12 = rol(bxor(s12, s00), 8)
+            s08 = s08 + s12
+            s04 = rol(bxor(s04, s08), 7)
 
-            s01 = s01 + s05 s13 = rol(bxor(s13, s01), 16)
-            s09 = s09 + s13 s05 = rol(bxor(s05, s09), 12)
-            s01 = s01 + s05 s13 = rol(bxor(s13, s01), 8)
-            s09 = s09 + s13 s05 = rol(bxor(s05, s09), 7)
+            s01 = s01 + s05
+            s13 = rol(bxor(s13, s01), 16)
+            s09 = s09 + s13
+            s05 = rol(bxor(s05, s09), 12)
+            s01 = s01 + s05
+            s13 = rol(bxor(s13, s01), 8)
+            s09 = s09 + s13
+            s05 = rol(bxor(s05, s09), 7)
 
-            s02 = s02 + s06 s14 = rol(bxor(s14, s02), 16)
-            s10 = s10 + s14 s06 = rol(bxor(s06, s10), 12)
-            s02 = s02 + s06 s14 = rol(bxor(s14, s02), 8)
-            s10 = s10 + s14 s06 = rol(bxor(s06, s10), 7)
+            s02 = s02 + s06
+            s14 = rol(bxor(s14, s02), 16)
+            s10 = s10 + s14
+            s06 = rol(bxor(s06, s10), 12)
+            s02 = s02 + s06
+            s14 = rol(bxor(s14, s02), 8)
+            s10 = s10 + s14
+            s06 = rol(bxor(s06, s10), 7)
 
-            s03 = s03 + s07 s15 = rol(bxor(s15, s03), 16)
-            s11 = s11 + s15 s07 = rol(bxor(s07, s11), 12)
-            s03 = s03 + s07 s15 = rol(bxor(s15, s03), 8)
-            s11 = s11 + s15 s07 = rol(bxor(s07, s11), 7)
+            s03 = s03 + s07
+            s15 = rol(bxor(s15, s03), 16)
+            s11 = s11 + s15
+            s07 = rol(bxor(s07, s11), 12)
+            s03 = s03 + s07
+            s15 = rol(bxor(s15, s03), 8)
+            s11 = s11 + s15
+            s07 = rol(bxor(s07, s11), 7)
 
-            s00 = s00 + s05 s15 = rol(bxor(s15, s00), 16)
-            s10 = s10 + s15 s05 = rol(bxor(s05, s10), 12)
-            s00 = s00 + s05 s15 = rol(bxor(s15, s00), 8)
-            s10 = s10 + s15 s05 = rol(bxor(s05, s10), 7)
+            s00 = s00 + s05
+            s15 = rol(bxor(s15, s00), 16)
+            s10 = s10 + s15
+            s05 = rol(bxor(s05, s10), 12)
+            s00 = s00 + s05
+            s15 = rol(bxor(s15, s00), 8)
+            s10 = s10 + s15
+            s05 = rol(bxor(s05, s10), 7)
 
-            s01 = s01 + s06 s12 = rol(bxor(s12, s01), 16)
-            s11 = s11 + s12 s06 = rol(bxor(s06, s11), 12)
-            s01 = s01 + s06 s12 = rol(bxor(s12, s01), 8)
-            s11 = s11 + s12 s06 = rol(bxor(s06, s11), 7)
+            s01 = s01 + s06
+            s12 = rol(bxor(s12, s01), 16)
+            s11 = s11 + s12
+            s06 = rol(bxor(s06, s11), 12)
+            s01 = s01 + s06
+            s12 = rol(bxor(s12, s01), 8)
+            s11 = s11 + s12
+            s06 = rol(bxor(s06, s11), 7)
 
-            s02 = s02 + s07 s13 = rol(bxor(s13, s02), 16)
-            s08 = s08 + s13 s07 = rol(bxor(s07, s08), 12)
-            s02 = s02 + s07 s13 = rol(bxor(s13, s02), 8)
-            s08 = s08 + s13 s07 = rol(bxor(s07, s08), 7)
+            s02 = s02 + s07
+            s13 = rol(bxor(s13, s02), 16)
+            s08 = s08 + s13
+            s07 = rol(bxor(s07, s08), 12)
+            s02 = s02 + s07
+            s13 = rol(bxor(s13, s02), 8)
+            s08 = s08 + s13
+            s07 = rol(bxor(s07, s08), 7)
 
-            s03 = s03 + s04 s14 = rol(bxor(s14, s03), 16)
-            s09 = s09 + s14 s04 = rol(bxor(s04, s09), 12)
-            s03 = s03 + s04 s14 = rol(bxor(s14, s03), 8)
-            s09 = s09 + s14 s04 = rol(bxor(s04, s09), 7)
+            s03 = s03 + s04
+            s14 = rol(bxor(s14, s03), 16)
+            s09 = s09 + s14
+            s04 = rol(bxor(s04, s09), 12)
+            s03 = s03 + s04
+            s14 = rol(bxor(s14, s03), 8)
+            s09 = s09 + s14
+            s04 = rol(bxor(s04, s09), 7)
         end
 
         -- Decode message block.

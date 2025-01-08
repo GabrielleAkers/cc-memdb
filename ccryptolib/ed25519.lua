@@ -1,11 +1,11 @@
 --- The Ed25519 digital signature scheme.
 
-local expect = require "cc.expect".expect
-local lassert = require "ccryptolib.internal.util".lassert
-local fq     = require "ccryptolib.internal.fq"
-local sha512 = require "ccryptolib.internal.sha512"
-local ed     = require "ccryptolib.internal.edwards25519"
-local random = require "ccryptolib.random"
+local expect  = require "cc.expect".expect
+local lassert = require "ccryptolib.int_util".lassert
+local fq      = require "ccryptolib.int_fq"
+local sha512  = require "ccryptolib.int_sha512"
+local ed      = require "ccryptolib.int_edwards25519"
+local random  = require "ccryptolib.random"
 
 --- Computes a public key from a secret key.
 --- @param sk string A random 32-byte secret key.

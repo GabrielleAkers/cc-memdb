@@ -1,8 +1,8 @@
 --- Arithmetic on Curve25519's scalar field.
 
-local mp = require "ccryptolib.internal.mp"
-local util = require "ccryptolib.internal.util"
-local packing = require "ccryptolib.internal.packing"
+local mp = require "ccryptolib.int_mp"
+local util = require "ccryptolib.int_util"
+local packing = require "ccryptolib.int_packing"
 
 local unpack = unpack or table.unpack
 local pfq, fmtfq = packing.compilePack("<I3I3I3I3I3I3I3I3I3I3I2")
@@ -173,7 +173,8 @@ end
 -- @treturn {number...} 2²⁶⁴ × a mod q as 11 limbs in [0..2²⁴).
 --
 local function decode(str)
-    local dec = {ufq(fmtfq, str, 1)} dec[12] = nil
+    local dec = { ufq(fmtfq, str, 1) }
+    dec[12] = nil
     return montgomery(dec)
 end
 
@@ -183,8 +184,10 @@ end
 -- @treturn {number...} 2²⁶⁴ × a mod q as 11 limbs in [0..2²⁴).
 --
 local function decodeWide(str)
-    local low = {ufql(fmtfql, str, 1)} low[12] = nil
-    local high = {ufqh(fmtfqh, str, 34)} high[12] = nil
+    local low = { ufql(fmtfql, str, 1) }
+    low[12] = nil
+    local high = { ufqh(fmtfqh, str, 34) }
+    high[12] = nil
     return add(montgomery(low), montgomery(montgomery(high)))
 end
 
@@ -195,7 +198,8 @@ end
 --
 local function decodeClamped(str)
     -- Decode.
-    local words = {ufq(fmtfq, str, 1)} words[12] = nil
+    local words = { ufq(fmtfq, str, 1) }
+    words[12] = nil
 
     -- Clamp.
     words[1] = bit32.band(words[1], 0xfffff8)
@@ -253,7 +257,7 @@ local function makeRuleset(a, b)
     local ff = mp.approx(ft)
 
     -- Lookup table for inversions and halvings modulo 3.
-    local lut3 = {[0] = 0, 2, 1}
+    local lut3 = { [0] = 0, 2, 1 }
 
     local rules = {}
     while ff ~= 0 do
@@ -353,7 +357,7 @@ local function makeRuleset(a, b)
     local ubits = util.rebaseLE(dt, 2 ^ 24, 2)
     while ubits[#ubits] == 0 do ubits[#ubits] = nil end
 
-    return {ubits, rules}
+    return { ubits, rules }
 end
 
 return {
