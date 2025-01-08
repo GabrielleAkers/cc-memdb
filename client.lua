@@ -1,5 +1,5 @@
 local shared = require("shared")
-local commands = shared.commands
+local field = require("cc.expect").field
 
 local ecnet2 = require("ecnet2")
 
@@ -15,8 +15,19 @@ local memdb = id:Protocol {
     deserialize = textutils.unserialize,
 }
 
-local server = "tOAiD4vaW0MwpOxYnriAUcoW7lEhGgt7P7cUo9QgUSs="
-local client_id = "abcdefhijklmnop"
+local p = shell.resolve("./.memdb.config")
+if not fs.exists(p) then
+    error("Cant find config file. Create ./.memdb.config with server and client_id fields")
+end
+local f = fs.open(p, "r")
+local config = textutils.unserialize(f.readAll())
+f.close()
+
+field(config, "server", "string")
+field(config, "client_id", "string")
+
+local server = config.server
+local client_id = config.client_id
 
 local main = function()
     local connection = memdb:connect(server, "top")
