@@ -158,10 +158,18 @@ commands.append = {
             return make_error("cannot append nil")
         end
         local d = _get_by_path(cmd.state, cmd.path)
-        if type(d) ~= "table" then
-            return make_error("data at path " .. cmd.path .. " isnt a table")
+        if type(d) ~= "table" and type(d) ~= "string" then
+            return make_error("can only append to string or table")
         end
-        d[#d + 1] = textutils.unserialise(cmd.data)
+        if type(d) == "table" then
+            d[#d + 1] = textutils.unserialise(cmd.data)
+        elseif type(d) == "string" then
+            local a = textutils.unserialise(cmd.data)
+            if type(a) ~= "string" and type(a) ~= "number" then
+                return make_error("can only append strings and number to strings, wrap strings in quotes")
+            end
+            d = "'" .. d .. a .. "'"
+        end
         _set_by_path(cmd.state, cmd.path, d)
         return make_response(true)
     end,
@@ -177,10 +185,18 @@ commands.prepend = {
             return make_error("cannot prepend nil")
         end
         local d = _get_by_path(cmd.state, cmd.path)
-        if type(d) ~= "table" then
-            return make_error("data at path " .. cmd.path .. " isnt a table")
+        if type(d) ~= "table" and type(d) ~= "string" then
+            return make_error("can only prepend to string or table")
         end
-        table.insert(d, 1, textutils.unserialise(cmd.data))
+        if type(d) == "table" then
+            table.insert(d, 1, textutils.unserialise(cmd.data))
+        elseif type(d) == "string" then
+            local a = textutils.unserialise(cmd.data)
+            if type(a) ~= "string" and type(a) ~= "number" then
+                return make_error("can only prepend strings and number to strings, wrap strings in quotes")
+            end
+            d = "'" .. a .. d .. "'"
+        end
         _set_by_path(cmd.state, cmd.path, d)
         return make_response(true)
     end,

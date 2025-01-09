@@ -44,7 +44,7 @@ local tests = {
     end)(),
     append_no_key = try_do("append").error ~= nil,
     append_nil = try_do("append a").error ~= nil,
-    append_not_table = (function()
+    append_not_table_or_str = (function()
         try_do("set a 2")
         return try_do("append a 3").error ~= nil
     end)(),
@@ -60,9 +60,23 @@ local tests = {
         local r2 = try_do("append a.b 2")
         return r1.data and r2.data and state.data.a.b[1] == 1 and state.data.a.b[2] == 2
     end)(),
+    append_str_to_str = (function()
+        try_do("set a 'hello'")
+        local r1 = try_do("get a").data == "hello"
+        try_do("append a ' world'")
+        local r2 = try_do("get a").data == "hello world"
+        return r1 and r2
+    end)(),
+    append_num_to_str = (function()
+        try_do("set a 'hello'")
+        local r1 = try_do("get a").data == "hello"
+        try_do("append a 2")
+        local r2 = try_do("get a").data == "hello2"
+        return r1 and r2
+    end)(),
     prepend_no_key = try_do("prepend").error ~= nil,
     prepend_nil = try_do("prepend a").error ~= nil,
-    prepend_not_table = (function()
+    prepend_not_table_or_str = (function()
         try_do("set a 2")
         return try_do("prepend a 3").error ~= nil
     end)(),
@@ -77,6 +91,20 @@ local tests = {
         local r1 = try_do("prepend a.b 1")
         local r2 = try_do("prepend a.b 2")
         return r1.data ~= nil and r2.data ~= nil and state.data.a.b[1] == 2 and state.data.a.b[2] == 1
+    end)(),
+    prepend_str_to_str = (function()
+        try_do("set a 'world'")
+        local r1 = try_do("get a").data == "world"
+        try_do("prepend a 'hello '")
+        local r2 = try_do("get a").data == "hello world"
+        return r1 and r2
+    end)(),
+    prepend_num_to_str = (function()
+        try_do("set a 'world'")
+        local r1 = try_do("get a").data == "world"
+        try_do("prepend a 2")
+        local r2 = try_do("get a").data == "2world"
+        return r1 and r2
     end)(),
     incr_nil = try_do("incr").error ~= nil,
     incr_nonnumber = (function()
