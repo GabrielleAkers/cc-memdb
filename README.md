@@ -1,6 +1,6 @@
 # cc-memdb
 
-A distributed key/value caching system for computercraft
+A distributed key/value caching system for computercraft inspired by [memcached](https://memcached.org/) that uses [ecnet2](https://github.com/migeyel/ecnet) for secure client/server communication
 
 There is a terminal client `client.lua` and a programmatic client `api_client.lua`
 
