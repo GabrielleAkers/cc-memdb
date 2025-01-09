@@ -1,3 +1,4 @@
+-- this is for interacting with the text protocol in the terminal
 local shared = require("shared")
 local field = require("cc.expect").field
 
