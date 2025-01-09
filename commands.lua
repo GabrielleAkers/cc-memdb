@@ -296,12 +296,12 @@ local try_do_command = function(state, str, lifetimes)
         return make_error("command not recognized. Do list_cmd to see available commands")
     end
     local cmd_res = commands[cmd[1]].cmd({ state = state, path = cmd[2], data = cmd[3], id = cmd[4] })
-    if (cmd[1] == "set" or cmd[1] == "safe_set") and cmd[2] then
+    if (cmd[1] == "set" or cmd[1] == "safe_set" or cmd[1] == "append" or cmd[1] == "prepend" or cmd[1] == "incr" or cmd[1] == "decr") and cmd[2] then
         local duration
-        if cmd[1] == "set" then
-            duration = tonumber(cmd[4])
-        else
+        if cmd[1] == "safe_set" then
             duration = tonumber(cmd[5])
+        else
+            duration = tonumber(cmd[4])
         end
         if not lifetimes[cmd[2]] then
             lifetimes[cmd[2]] = {}
