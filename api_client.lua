@@ -104,8 +104,8 @@ local new_client = function(server, client_id, request_timeout)
 
     local _setter = function(cmd)
         return function(path, val, lifetime, id)
-            local is_table = (type(val) == "table")
-            return client._send_memdb_cmd(cmd, path, textutils.serialize(val, { compact = is_table }), lifetime, id)
+            return client._send_memdb_cmd(cmd, path, textutils.serialize(val, { compact = (type(val) == "table") }),
+                lifetime, id)
         end
     end
 
