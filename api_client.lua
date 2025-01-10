@@ -22,30 +22,28 @@ local ecnet2 = require("ecnet2")
 --- @param request_timeout number the amount of time in seconds to wait before timing out when receiving a server response
 --- @return memdbclient client configured memdb client
 local new_client = function(server, client_id, request_timeout)
+    shared.init_random()
+    ecnet2.open("top")
+
     local client = {
         _server = server,
         _client_id = client_id,
         _connection = nil,
-        _timeout = request_timeout
+        _timeout = request_timeout,
+        _id = ecnet2.Identity("/.ecnet2"),
+    }
+
+    client._memdb = client._id:Protocol {
+        name = "memdb",
+        serialize = textutils.serialize,
+        deserialize = textutils.unserialize,
     }
 
     client._do_network_action = function(action)
         local collected_result = nil
         local time_start = os.epoch("utc")
         local main = function()
-            shared.init_random()
-
-            ecnet2.open("top")
-
-            local id = ecnet2.Identity("/.ecnet2")
-
-            local memdb = id:Protocol {
-                name = "memdb",
-                serialize = textutils.serialize,
-                deserialize = textutils.unserialize,
-            }
-
-            client._connection = memdb:connect(server, "top")
+            client._connection = client._memdb:connect(server, "top")
             client._connection:receive(client._timeout) -- yield to let the daemon process
 
             client._connection:send("client_id=" .. client_id)
